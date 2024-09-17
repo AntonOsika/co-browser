@@ -34,6 +34,18 @@ window.llm("What is the capital of France?").then(response => {
   const [chatInput, setChatInput] = useState('');
   const terminalRef = useRef(null);
 
+  const deepStringify = (obj, depth = 0, maxDepth = 3) => {
+    if (depth > maxDepth) return '[Object]';
+    if (typeof obj !== 'object' || obj === null) return String(obj);
+    if (Array.isArray(obj)) {
+      return '[' + obj.map(item => deepStringify(item, depth + 1, maxDepth)).join(', ') + ']';
+    }
+    const pairs = Object.entries(obj).map(
+      ([key, value]) => `${key}: ${deepStringify(value, depth + 1, maxDepth)}`
+    );
+    return '{' + pairs.join(', ') + '}';
+  };
+
   const appendToConsole = useCallback((message) => {
     setConsoleOutput(prev => [...prev, message]);
   }, []);
@@ -54,11 +66,17 @@ window.llm("What is the capital of France?").then(response => {
     const originalConsoleLog = console.log;
     const originalConsoleError = console.error;
     console.log = (...args) => {
-      appendToConsole(args.join(' '));
+      const formattedArgs = args.map(arg => 
+        typeof arg === 'object' && arg !== null ? deepStringify(arg) : String(arg)
+      );
+      appendToConsole(formattedArgs.join(' '));
       originalConsoleLog(...args);
     };
     console.error = (...args) => {
-      appendToConsole('ERROR: ' + args.join(' '));
+      const formattedArgs = args.map(arg => 
+        typeof arg === 'object' && arg !== null ? deepStringify(arg) : String(arg)
+      );
+      appendToConsole('ERROR: ' + formattedArgs.join(' '));
       originalConsoleError(...args);
     };
 
