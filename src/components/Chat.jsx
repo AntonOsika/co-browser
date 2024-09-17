@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import ToolUseBox from './ToolUseBox';
 
 const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    // This effect will run whenever chatInput changes
-  }, [chatInput]);
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,8 +38,9 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-grow overflow-y-auto mb-4">
+      <div className="flex-grow overflow-y-auto mb-4 pr-2">
         {messages.map((message, index) => renderMessage(message, index))}
+        <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="flex">
         <Input

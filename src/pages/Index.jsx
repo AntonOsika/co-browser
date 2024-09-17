@@ -12,11 +12,9 @@ const Index = () => {
   - canvas_api.createIframe(url, x, y, width, height): Creates an iframe on the canvas
   - canvas_api.stage: Access to the stage object for more advanced manipulations (currently null)
 
-You can also use the execute_javascript tool to run JavaScript code. The output will be displayed in the console log on the right side of the screen.
+You can also use the execute_javascript tool to run JavaScript code.
 
-The user can now directly type and execute JavaScript in the console output area.
-
-A new function js_observation(message) is available on the window object. When called, it prepends the following text to the chat input box:
+A function js_observation(message) is available to communicate back from javascript. When called, it prepends the following text to the chat input box:
 "javascript observation:
 [message]
 
@@ -132,7 +130,9 @@ Use this function to report observations from JavaScript code execution to the A
             placeholder="Enter Claude API Key"
             className="mb-4"
           />
-          <Chat messages={messages} onSendMessage={handleSendMessage} chatInput={chatInput} setChatInput={setChatInput} />
+          <div className="flex-grow overflow-hidden">
+            <Chat messages={messages} onSendMessage={handleSendMessage} chatInput={chatInput} setChatInput={setChatInput} />
+          </div>
         </div>
       </ResizablePanel>
       <ResizableHandle />
