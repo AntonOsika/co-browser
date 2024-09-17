@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export const useChatLogic = (apiKey, systemPrompt) => {
   const [messages, setMessages] = useState([]);
@@ -90,8 +90,7 @@ export const useChatLogic = (apiKey, systemPrompt) => {
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
             } else if (item.name === 'execute_bash') {
-              const output = executeBash(item.input.command);
-              assistantMessage.content += `\n\nBash command output:\n${output}`;
+              executeBash(item.input.command);
             }
           }
         }
@@ -120,5 +119,20 @@ export const useChatLogic = (apiKey, systemPrompt) => {
     return `Simulated output for: ${command}\n(Note: Actual bash execution is not possible in the browser environment)`;
   };
 
-  return { messages, handleSendMessage, executeJavaScript, executeBash };
+  const handleBashOutput = useCallback((output) => {
+    setMessages(prevMessages => {
+      const lastMessage = prevMessages[prevMessages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        const updatedMessage = {
+          ...lastMessage,
+          content: lastMessage.content + (lastMessage.content ? '\n\n' : '') + 'Terminal output:\n' + output
+        };
+        return [...prevMessages.slice(0, -1), updatedMessage];
+      } else {
+        return [...prevMessages, { role: 'assistant', content: 'Terminal output:\n' + output }];
+      }
+    });
+  }, []);
+
+  return { messages, handleSendMessage, executeJavaScript, executeBash, handleBashOutput };
 };
