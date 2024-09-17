@@ -40,13 +40,17 @@ You can also use the execute_javascript tool to run JavaScript code.`);
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01'
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
           model: 'claude-3-sonnet-20240229',
           max_tokens: 1024,
-          messages: [{ role: 'system', content: systemPrompt }, ...messages, newMessage],
-          system: systemPrompt,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...messages,
+            newMessage
+          ],
           tools: [
             {
               name: 'execute_javascript',
