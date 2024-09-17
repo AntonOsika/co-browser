@@ -98,10 +98,6 @@ window.llm("What is the capital of France?").then(response => {
     };
   }, [appendToConsole, setChatInput, apiKey]);
 
-  const handleBashCommand = (command) => {
-    handleSendMessage(`Executing bash command: ${command}`);
-  };
-
   return (
     <ResizablePanelGroup direction="horizontal" className="h-screen">
       <ResizablePanel defaultSize={50} minSize={30}>
@@ -128,7 +124,7 @@ window.llm("What is the capital of France?").then(response => {
       <ResizablePanel defaultSize={50} minSize={30}>
         <ResizablePanelGroup direction="vertical">
           <ResizablePanel defaultSize={50}>
-            <Terminal onBashCommand={handleBashCommand} />
+            <Terminal onBashCommand={executeBash} />
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel defaultSize={50}>
