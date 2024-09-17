@@ -57,25 +57,9 @@ Use this function to report observations from JavaScript code execution to the A
     };
   }, [appendToConsole]);
 
-  const ensureAlternatingRoles = (msgs) => {
-    const result = [];
-    let lastRole = msgs.length > 0 ? msgs[msgs.length - 1].role : 'assistant';
-
-    for (const msg of msgs) {
-      if (msg.role === lastRole) {
-        result.push({ role: lastRole === 'user' ? 'assistant' : 'user', content: '' });
-      }
-      result.push(msg);
-      lastRole = msg.role;
-    }
-
-    return result;
-  };
-
   const handleSendMessage = async (message) => {
     const newMessage = { role: 'user', content: message };
-    const updatedMessages = ensureAlternatingRoles([...messages, newMessage]);
-    setMessages(updatedMessages);
+    setMessages(prevMessages => [...prevMessages, newMessage]);
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -90,7 +74,7 @@ Use this function to report observations from JavaScript code execution to the A
           model: 'claude-3-sonnet-20240229',
           max_tokens: 1024,
           system: systemPrompt,
-          messages: updatedMessages,
+          messages: messages.filter(msg => msg.role !== 'tool_use').concat(newMessage),
           tools: [
             {
               name: 'execute_javascript',
@@ -113,18 +97,16 @@ Use this function to report observations from JavaScript code execution to the A
       const data = await response.json();
       
       if (data.content && data.content.length > 0) {
-        const newMessages = [];
         for (const item of data.content) {
           if (item.type === 'text') {
-            newMessages.push({ role: 'assistant', content: item.text });
+            setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: item.text }]);
           } else if (item.type === 'tool_use') {
-            newMessages.push({ role: 'tool_use', name: item.name, input: item.input });
+            setMessages(prevMessages => [...prevMessages, { role: 'tool_use', name: item.name, input: item.input }]);
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
             }
           }
         }
-        setMessages(prevMessages => ensureAlternatingRoles([...prevMessages, ...newMessages]));
       } else {
         console.error('Unexpected API response format:', data);
       }
