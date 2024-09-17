@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from './ui/input';
 
-const Terminal = () => {
+const Terminal = ({ onBashCommand }) => {
   const [output, setOutput] = useState([]);
   const [input, setInput] = useState('');
   const [isReady, setIsReady] = useState(false);
@@ -63,6 +63,7 @@ const Terminal = () => {
       const command = input;
       appendToOutput(`$ ${command}`);
       socketRef.current.send(JSON.stringify({ type: 'command', command: command }));
+      onBashCommand(command);
       setInput('');
     }
   };
