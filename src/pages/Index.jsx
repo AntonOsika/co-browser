@@ -1,18 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Chat from '../components/Chat';
-import Canvas from '../components/Canvas';
+import Terminal from '../components/Terminal';
 import ConsoleLog from '../components/ConsoleLog';
 import { Textarea } from '../components/ui/textarea';
 import { Input } from '../components/ui/input';
 import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from '../components/ui/resizable';
 
 const Index = () => {
-  const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the canvas_api to manipulate the canvas. Available methods:
-  - canvas_api.createIframe(url, x, y, width, height): Creates an iframe on the canvas
-  - canvas_api.stage: Access to the stage object for more advanced manipulations (currently null)
-
-You can also use the execute_javascript tool to run JavaScript code.
+  const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the execute_javascript tool to run JavaScript code.
 
 A function js_observation(message) is available to communicate back from javascript. When called, it prepends the following text to the chat input box:
 "javascript observation:
@@ -25,41 +21,34 @@ Use this function to report observations from JavaScript code execution to the A
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [chatInput, setChatInput] = useState('');
 
-  const appendToConsole = useCallback((message) => {
-    setConsoleOutput(prev => [...prev, message]);
-  }, []);
+  const ensureAlternatingRoles = (msgs) => {
+    const result = [];
+    let lastRole = 'assistant';
 
-  useEffect(() => {
-    const originalConsoleLog = console.log;
-    const originalConsoleError = console.error;
-    console.log = (...args) => {
-      appendToConsole(args.join(' '));
-      originalConsoleLog(...args);
-    };
-    console.error = (...args) => {
-      appendToConsole('ERROR: ' + args.join(' '));
-      originalConsoleError(...args);
-    };
+    for (const msg of msgs) {
+      if (msg.role === 'tool_use') {
+        result.push(msg);
+      } else if (msg.role !== lastRole) {
+        result.push(msg);
+        lastRole = msg.role;
+      } else {
+        result.push({ role: lastRole === 'user' ? 'assistant' : 'user', content: '' });
+        result.push(msg);
+        lastRole = msg.role;
+      }
+    }
 
-    window.js_observation = (message) => {
-      setChatInput(prev => `javascript observation:\n${message}\n\n${prev}`);
-    };
+    if (lastRole === 'user') {
+      result.push({ role: 'assistant', content: '' });
+    }
 
-    window.onerror = (message, source, lineno, colno, error) => {
-      console.error(`Global error: ${message} at ${source}:${lineno}:${colno}`, error);
-    };
-
-    return () => {
-      console.log = originalConsoleLog;
-      console.error = originalConsoleError;
-      delete window.js_observation;
-      window.onerror = null;
-    };
-  }, [appendToConsole]);
+    return result;
+  };
 
   const handleSendMessage = async (message) => {
     const newMessage = { role: 'user', content: message };
-    setMessages(prevMessages => [...prevMessages, newMessage]);
+    const updatedMessages = ensureAlternatingRoles([...messages, newMessage]);
+    setMessages(updatedMessages);
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -74,7 +63,7 @@ Use this function to report observations from JavaScript code execution to the A
           model: 'claude-3-sonnet-20240229',
           max_tokens: 1024,
           system: systemPrompt,
-          messages: messages.filter(msg => msg.role !== 'tool_use').concat(newMessage),
+          messages: updatedMessages,
           tools: [
             {
               name: 'execute_javascript',
@@ -99,7 +88,7 @@ Use this function to report observations from JavaScript code execution to the A
       if (data.content && data.content.length > 0) {
         for (const item of data.content) {
           if (item.type === 'text') {
-            setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: item.text }]);
+            setMessages(prevMessages => ensureAlternatingRoles([...prevMessages, { role: 'assistant', content: item.text }]));
           } else if (item.type === 'tool_use') {
             setMessages(prevMessages => [...prevMessages, { role: 'tool_use', name: item.name, input: item.input }]);
             if (item.name === 'execute_javascript') {
@@ -149,11 +138,11 @@ Use this function to report observations from JavaScript code execution to the A
       <ResizableHandle />
       <ResizablePanel defaultSize={50} minSize={30}>
         <ResizablePanelGroup direction="vertical">
-          <ResizablePanel defaultSize={70}>
-            <Canvas />
+          <ResizablePanel defaultSize={50}>
+            <Terminal />
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel defaultSize={30}>
+          <ResizablePanel defaultSize={50}>
             <ConsoleLog output={consoleOutput} onExecute={executeJavaScript} />
           </ResizablePanel>
         </ResizablePanelGroup>
