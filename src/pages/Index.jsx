@@ -101,24 +101,36 @@ window.llm("What is the capital of France?").then(response => {
   return (
     <ResizablePanelGroup direction="horizontal" className="h-screen">
       <ResizablePanel defaultSize={50} minSize={30}>
-        <div className="p-4 flex flex-col h-full">
-          <Textarea
-            value={systemPrompt}
-            onChange={(e) => setSystemPrompt(e.target.value)}
-            placeholder="Enter system prompt"
-            className="mb-4"
-          />
-          <Input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter Claude API Key"
-            className="mb-4"
-          />
-          <div className="flex-grow overflow-hidden">
-            <Chat messages={messages} onSendMessage={handleSendMessage} chatInput={chatInput} setChatInput={setChatInput} />
-          </div>
-        </div>
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel defaultSize={20} minSize={10}>
+            <div className="p-4">
+              <Textarea
+                value={systemPrompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
+                placeholder="Enter system prompt"
+                className="w-full h-full resize-none"
+              />
+            </div>
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel defaultSize={10} minSize={5}>
+            <div className="p-4">
+              <Input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter Claude API Key"
+                className="w-full"
+              />
+            </div>
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel defaultSize={70} minSize={30}>
+            <div className="p-4 h-full">
+              <Chat messages={messages} onSendMessage={handleSendMessage} chatInput={chatInput} setChatInput={setChatInput} />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize={50} minSize={30}>
