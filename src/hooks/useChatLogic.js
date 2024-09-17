@@ -1,8 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
 export const useChatLogic = (apiKey, systemPrompt) => {
   const [messages, setMessages] = useState([]);
-  const [socket, setSocket] = useState(null);
 
   const ensureAlternatingRoles = (msgs) => {
     const result = [];
@@ -91,7 +90,8 @@ export const useChatLogic = (apiKey, systemPrompt) => {
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
             } else if (item.name === 'execute_bash') {
-              executeBash(item.input.command);
+              const output = executeBash(item.input.command);
+              assistantMessage.content += `\n\nBash command output:\n${output}`;
             }
           }
         }
@@ -115,44 +115,10 @@ export const useChatLogic = (apiKey, systemPrompt) => {
   };
 
   const executeBash = (command) => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: 'command', command: command }));
-    } else {
-      console.error('WebSocket is not connected. Unable to execute bash command.');
-    }
+    // Simulate bash command execution
+    console.log(`Simulating bash command: ${command}`);
+    return `Simulated output for: ${command}\n(Note: Actual bash execution is not possible in the browser environment)`;
   };
 
-  const handleBashOutput = useCallback((output) => {
-    setMessages(prevMessages => {
-      const lastMessage = prevMessages[prevMessages.length - 1];
-      if (lastMessage.role === 'assistant') {
-        const updatedMessage = {
-          ...lastMessage,
-          content: lastMessage.content + (lastMessage.content ? '\n\n' : '') + 'Terminal output:\n' + output
-        };
-        return [...prevMessages.slice(0, -1), updatedMessage];
-      } else {
-        return [...prevMessages, { role: 'assistant', content: 'Terminal output:\n' + output }];
-      }
-    });
-  }, []);
-
-  const initializeWebSocket = () => {
-    const newSocket = new WebSocket('ws://localhost:8080');
-    newSocket.addEventListener('open', () => {
-      console.log('Connected to WebSocket server');
-    });
-    newSocket.addEventListener('message', (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === 'output' || message.type === 'error') {
-        handleBashOutput(message.data);
-      }
-    });
-    newSocket.addEventListener('close', () => {
-      console.log('Disconnected from WebSocket server');
-    });
-    setSocket(newSocket);
-  };
-
-  return { messages, handleSendMessage, executeJavaScript, executeBash, handleBashOutput, initializeWebSocket };
+  return { messages, handleSendMessage, executeJavaScript, executeBash };
 };

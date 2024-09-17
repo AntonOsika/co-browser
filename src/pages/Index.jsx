@@ -33,7 +33,7 @@ window.llm("What is the capital of France?").then(response => {
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [chatInput, setChatInput] = useState('');
 
-  const { messages, handleSendMessage, executeJavaScript, executeBash, handleBashOutput } = useChatLogic(apiKey, systemPrompt);
+  const { messages, handleSendMessage, executeJavaScript, executeBash } = useChatLogic(apiKey, systemPrompt);
 
   const appendToConsole = useCallback((message) => {
     setConsoleOutput(prev => [...prev, message]);
@@ -124,7 +124,7 @@ window.llm("What is the capital of France?").then(response => {
       <ResizablePanel defaultSize={50} minSize={30}>
         <ResizablePanelGroup direction="vertical">
           <ResizablePanel defaultSize={50}>
-            <Terminal onBashCommand={executeBash} onBashOutput={handleBashOutput} />
+            <Terminal onBashCommand={executeBash} />
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel defaultSize={50}>
