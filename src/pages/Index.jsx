@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Chat from '../components/Chat';
 import Canvas from '../components/Canvas';
@@ -12,22 +12,28 @@ const Index = () => {
   - canvas_api.createIframe(url, x, y, width, height): Creates an iframe on the canvas
   - canvas_api.stage: Access to the stage object for more advanced manipulations (currently null)
 
-You can also use the execute_javascript tool to run JavaScript code. The output will be displayed in the console log on the right side of the screen.`);
+You can also use the execute_javascript tool to run JavaScript code. The output will be displayed in the console log on the right side of the screen.
+
+The user can now directly type and execute JavaScript in the console output area.`);
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
   const [messages, setMessages] = useState([]);
   const [consoleOutput, setConsoleOutput] = useState([]);
 
+  const appendToConsole = useCallback((message) => {
+    setConsoleOutput(prev => [...prev, message]);
+  }, []);
+
   useEffect(() => {
     const originalConsoleLog = console.log;
     console.log = (...args) => {
-      setConsoleOutput(prev => [...prev, args.join(' ')]);
+      appendToConsole(args.join(' '));
       originalConsoleLog(...args);
     };
 
     return () => {
       console.log = originalConsoleLog;
     };
-  }, []);
+  }, [appendToConsole]);
 
   const handleSendMessage = async (message) => {
     const newMessage = { role: 'user', content: message };
@@ -75,12 +81,7 @@ You can also use the execute_javascript tool to run JavaScript code. The output 
           } else if (item.type === 'tool_use') {
             setMessages(prevMessages => [...prevMessages, { role: 'tool_use', name: item.name, input: item.input }]);
             if (item.name === 'execute_javascript') {
-              try {
-                // eslint-disable-next-line no-eval
-                eval(item.input.code);
-              } catch (error) {
-                console.error('Error executing JavaScript:', error);
-              }
+              executeJavaScript(item.input.code);
             }
           }
         }
@@ -89,6 +90,15 @@ You can also use the execute_javascript tool to run JavaScript code. The output 
       }
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const executeJavaScript = (code) => {
+    try {
+      // eslint-disable-next-line no-eval
+      eval(code);
+    } catch (error) {
+      console.error('Error executing JavaScript:', error);
     }
   };
 
@@ -120,7 +130,7 @@ You can also use the execute_javascript tool to run JavaScript code. The output 
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel defaultSize={30}>
-            <ConsoleLog output={consoleOutput} />
+            <ConsoleLog output={consoleOutput} onExecute={executeJavaScript} />
           </ResizablePanel>
         </ResizablePanelGroup>
       </ResizablePanel>
