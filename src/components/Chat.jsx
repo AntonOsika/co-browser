@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import ToolUseBox from './ToolUseBox';
 
-const Chat = ({ messages, onSendMessage }) => {
-  const [input, setInput] = useState('');
+const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
+  useEffect(() => {
+    // This effect will run whenever chatInput changes
+  }, [chatInput]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (input.trim()) {
-      onSendMessage(input);
-      setInput('');
+    if (chatInput.trim()) {
+      onSendMessage(chatInput);
+      setChatInput('');
     }
   };
 
@@ -36,8 +38,8 @@ const Chat = ({ messages, onSendMessage }) => {
       <form onSubmit={handleSubmit} className="flex">
         <Input
           type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          value={chatInput}
+          onChange={(e) => setChatInput(e.target.value)}
           placeholder="Type your message..."
           className="flex-grow mr-2"
         />

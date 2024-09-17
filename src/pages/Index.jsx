@@ -14,10 +14,18 @@ const Index = () => {
 
 You can also use the execute_javascript tool to run JavaScript code. The output will be displayed in the console log on the right side of the screen.
 
-The user can now directly type and execute JavaScript in the console output area.`);
+The user can now directly type and execute JavaScript in the console output area.
+
+A new function js_observation(message) is available on the window object. When called, it prepends the following text to the chat input box:
+"javascript observation:
+[message]
+
+"
+Use this function to report observations from JavaScript code execution to the AI assistant.`);
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
   const [messages, setMessages] = useState([]);
   const [consoleOutput, setConsoleOutput] = useState([]);
+  const [chatInput, setChatInput] = useState('');
 
   const appendToConsole = useCallback((message) => {
     setConsoleOutput(prev => [...prev, message]);
@@ -30,8 +38,13 @@ The user can now directly type and execute JavaScript in the console output area
       originalConsoleLog(...args);
     };
 
+    window.js_observation = (message) => {
+      setChatInput(prev => `javascript observation:\n${message}\n\n${prev}`);
+    };
+
     return () => {
       console.log = originalConsoleLog;
+      delete window.js_observation;
     };
   }, [appendToConsole]);
 
@@ -119,7 +132,7 @@ The user can now directly type and execute JavaScript in the console output area
             placeholder="Enter Claude API Key"
             className="mb-4"
           />
-          <Chat messages={messages} onSendMessage={handleSendMessage} />
+          <Chat messages={messages} onSendMessage={handleSendMessage} chatInput={chatInput} setChatInput={setChatInput} />
         </div>
       </ResizablePanel>
       <ResizableHandle />
