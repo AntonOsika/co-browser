@@ -1,25 +1,29 @@
 import React, { useEffect, useRef } from 'react';
-import { Stage, Layer } from 'react-konva';
 
 const Canvas = () => {
-  const stageRef = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (stageRef.current) {
+    if (canvasRef.current) {
       window.canvas_api = {
-        ...window.canvas_api,
-        stage: stageRef.current
+        createIframe: (url, x, y, width, height) => {
+          const iframe = document.createElement('iframe');
+          iframe.src = url;
+          iframe.style.position = 'absolute';
+          iframe.style.left = `${x}px`;
+          iframe.style.top = `${y}px`;
+          iframe.style.width = `${width}px`;
+          iframe.style.height = `${height}px`;
+          canvasRef.current.appendChild(iframe);
+        },
+        stage: null // This will be set if we integrate Konva in the future
       };
     }
   }, []);
 
   return (
-    <div id="canvas" className="w-full h-full relative">
-      <Stage ref={stageRef} width={window.innerWidth / 2} height={window.innerHeight}>
-        <Layer>
-          {/* Konva shapes can be added here */}
-        </Layer>
-      </Stage>
+    <div id="canvas" ref={canvasRef} className="w-full h-full relative bg-gray-100 border border-gray-300">
+      {/* Canvas content will be added here dynamically */}
     </div>
   );
 };

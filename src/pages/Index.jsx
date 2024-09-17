@@ -9,7 +9,8 @@ import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from '../compone
 
 const Index = () => {
   const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the canvas_api to manipulate the canvas. Available methods:
-  - canvas_api.stage: Access to the Konva stage object for more advanced manipulations
+  - canvas_api.createIframe(url, x, y, width, height): Creates an iframe on the canvas
+  - canvas_api.stage: Access to the stage object for more advanced manipulations (currently null)
 
 You can also use the execute_javascript tool to run JavaScript code. The output will be displayed in the console log on the right side of the screen.`);
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
