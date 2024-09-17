@@ -8,9 +8,7 @@ export const useChatLogic = (apiKey, systemPrompt) => {
     let lastRole = 'assistant';
 
     for (const msg of msgs) {
-      if (msg.role === 'tool_use') {
-        result.push(msg);
-      } else if (msg.role !== lastRole) {
+      if (msg.role !== lastRole) {
         result.push(msg);
         lastRole = msg.role;
       } else {
@@ -82,19 +80,23 @@ export const useChatLogic = (apiKey, systemPrompt) => {
       const data = await response.json();
       
       if (data.content && data.content.length > 0) {
+        let assistantMessage = { role: 'assistant', content: '', toolUses: [] };
+        
         for (const item of data.content) {
           if (item.type === 'text') {
-            setMessages(prevMessages => ensureAlternatingRoles([...prevMessages, { role: 'assistant', content: item.text }]));
+            assistantMessage.content += item.text;
           } else if (item.type === 'tool_use') {
-            setMessages(prevMessages => [...prevMessages, { role: 'tool_use', name: item.name, input: item.input }]);
+            assistantMessage.toolUses.push({ name: item.name, input: item.input });
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
             } else if (item.name === 'execute_bash') {
               const output = executeBash(item.input.command);
-              setMessages(prevMessages => ensureAlternatingRoles([...prevMessages, { role: 'assistant', content: `Bash command output:\n${output}` }]));
+              assistantMessage.content += `\n\nBash command output:\n${output}`;
             }
           }
         }
+        
+        setMessages(prevMessages => ensureAlternatingRoles([...prevMessages, assistantMessage]));
       } else {
         console.error('Unexpected API response format:', data);
       }
