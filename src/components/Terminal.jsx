@@ -9,12 +9,7 @@ const Terminal = () => {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.hostname;
-    const port = 8080; // Ensure this matches your WebSocket server port
-    const wsUrl = `${protocol}//${host}:${port}`;
-
-    socketRef.current = new WebSocket(wsUrl);
+    socketRef.current = new WebSocket('ws://localhost:8080');
 
     socketRef.current.addEventListener('open', () => {
       console.log('Connected to WebSocket server');
@@ -38,15 +33,8 @@ const Terminal = () => {
 
     socketRef.current.addEventListener('close', () => {
       console.log('Disconnected from WebSocket server');
-      appendToOutput('Disconnected from server. Attempting to reconnect...');
+      appendToOutput('Disconnected from server.');
       setIsReady(false);
-      
-      // Attempt to reconnect after 5 seconds
-      setTimeout(() => {
-        if (socketRef.current.readyState === WebSocket.CLOSED) {
-          socketRef.current = new WebSocket(wsUrl);
-        }
-      }, 5000);
     });
 
     return () => {
