@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from './ui/input';
 
-const Terminal = ({ onBashCommand }) => {
+const Terminal = ({ onBashCommand, onBashOutput }) => {
   const [output, setOutput] = useState([]);
   const [input, setInput] = useState('');
   const [isReady, setIsReady] = useState(false);
@@ -24,9 +24,11 @@ const Terminal = ({ onBashCommand }) => {
         case 'output':
         case 'error':
           appendToOutput(message.data);
+          onBashOutput(message.data); // Send bash output to chat
           break;
         case 'terminated':
           appendToOutput(`Shell terminated with code ${message.code}`);
+          onBashOutput(`Shell terminated with code ${message.code}`); // Send termination message to chat
           break;
       }
     });
@@ -42,7 +44,7 @@ const Terminal = ({ onBashCommand }) => {
         socketRef.current.close();
       }
     };
-  }, []);
+  }, [onBashOutput]);
 
   useEffect(() => {
     if (outputRef.current) {

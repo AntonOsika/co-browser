@@ -32,11 +32,16 @@ window.llm("What is the capital of France?").then(response => {
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [chatInput, setChatInput] = useState('');
+  const [bashOutput, setBashOutput] = useState('');
 
   const { messages, handleSendMessage, executeJavaScript, executeBash } = useChatLogic(apiKey, systemPrompt);
 
   const appendToConsole = useCallback((message) => {
     setConsoleOutput(prev => [...prev, message]);
+  }, []);
+
+  const handleBashOutput = useCallback((output) => {
+    setBashOutput(prev => prev + output + '\n');
   }, []);
 
   useEffect(() => {
@@ -116,7 +121,13 @@ window.llm("What is the capital of France?").then(response => {
             className="mb-4"
           />
           <div className="flex-grow overflow-hidden">
-            <Chat messages={messages} onSendMessage={handleSendMessage} chatInput={chatInput} setChatInput={setChatInput} />
+            <Chat
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              chatInput={chatInput}
+              setChatInput={setChatInput}
+              bashOutput={bashOutput}
+            />
           </div>
         </div>
       </ResizablePanel>
@@ -124,7 +135,7 @@ window.llm("What is the capital of France?").then(response => {
       <ResizablePanel defaultSize={50} minSize={30}>
         <ResizablePanelGroup direction="vertical">
           <ResizablePanel defaultSize={50}>
-            <Terminal onBashCommand={executeBash} />
+            <Terminal onBashCommand={executeBash} onBashOutput={handleBashOutput} />
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel defaultSize={50}>
