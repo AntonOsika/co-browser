@@ -47,7 +47,7 @@ You can also use the execute_javascript tool to run JavaScript code.`);
           model: 'claude-3-sonnet-20240229',
           max_tokens: 1024,
           system: systemPrompt,
-          messages: [...messages, newMessage],
+          messages: messages.filter(msg => msg.role !== 'tool_use').concat(newMessage),
           tools: [
             {
               name: 'execute_javascript',
@@ -70,13 +70,11 @@ You can also use the execute_javascript tool to run JavaScript code.`);
       const data = await response.json();
       
       if (data.content && data.content.length > 0) {
-        const aiMessage = { role: 'assistant', content: '' };
-        
         for (const item of data.content) {
           if (item.type === 'text') {
-            aiMessage.content += item.text;
+            setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: item.text }]);
           } else if (item.type === 'tool_use') {
-            aiMessage.content += `\n[Tool Use: ${item.name}]\nInput: ${JSON.stringify(item.input)}\n`;
+            setMessages(prevMessages => [...prevMessages, { role: 'tool_use', name: item.name, input: item.input }]);
             if (item.name === 'execute_javascript') {
               try {
                 // eslint-disable-next-line no-eval
@@ -87,8 +85,6 @@ You can also use the execute_javascript tool to run JavaScript code.`);
             }
           }
         }
-        
-        setMessages(prevMessages => [...prevMessages, aiMessage]);
       } else {
         console.error('Unexpected API response format:', data);
       }
