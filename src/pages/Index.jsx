@@ -8,14 +8,16 @@ import { Input } from '../components/ui/input';
 import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from '../components/ui/resizable';
 
 const Index = () => {
-  const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the execute_javascript tool to run JavaScript code.
+  const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the execute_javascript tool to run JavaScript code and the execute_bash tool to run bash commands.
 
 A function js_observation(message) is available to communicate back from javascript. When called, it prepends the following text to the chat input box:
 "javascript observation:
 [message]
 
 "
-Use this function to report observations from JavaScript code execution to the AI assistant.`);
+Use this function to report observations from JavaScript code execution to the AI assistant.
+
+For bash commands, the output will be returned directly to you.`);
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
   const [messages, setMessages] = useState([]);
   const [consoleOutput, setConsoleOutput] = useState([]);
@@ -108,6 +110,20 @@ Use this function to report observations from JavaScript code execution to the A
                 },
                 required: ['code']
               }
+            },
+            {
+              name: 'execute_bash',
+              description: 'Execute bash commands',
+              input_schema: {
+                type: 'object',
+                properties: {
+                  command: {
+                    type: 'string',
+                    description: 'The bash command to execute'
+                  }
+                },
+                required: ['command']
+              }
             }
           ]
         })
@@ -123,6 +139,9 @@ Use this function to report observations from JavaScript code execution to the A
             setMessages(prevMessages => [...prevMessages, { role: 'tool_use', name: item.name, input: item.input }]);
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
+            } else if (item.name === 'execute_bash') {
+              const output = executeBash(item.input.command);
+              setMessages(prevMessages => ensureAlternatingRoles([...prevMessages, { role: 'assistant', content: `Bash command output:\n${output}` }]));
             }
           }
         }
@@ -141,6 +160,12 @@ Use this function to report observations from JavaScript code execution to the A
     } catch (error) {
       console.error('Error executing JavaScript:', error);
     }
+  };
+
+  const executeBash = (command) => {
+    // Simulate bash command execution
+    console.log(`Simulating bash command: ${command}`);
+    return `Simulated output for: ${command}\n(Note: Actual bash execution is not possible in the browser environment)`;
   };
 
   return (
