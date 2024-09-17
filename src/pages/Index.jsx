@@ -5,13 +5,11 @@ import Canvas from '../components/Canvas';
 import { Textarea } from '../components/ui/textarea';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Rect } from 'react-konva';
 
 const Index = () => {
   const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the canvas_api to manipulate the canvas. Available methods:
-  - canvas_api.stage: Access to the Konva stage object
-  - canvas_api.layer: Access to the main Konva layer
-  - Use react-konva components to add shapes and elements to the canvas
+  - canvas_api.createIframe(url, x, y, width, height): Creates an iframe on the canvas
+  - canvas_api.stage: Access to the Konva stage object for more advanced manipulations
 
 You can also use the execute_javascript tool to run JavaScript code.`);
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
@@ -19,8 +17,17 @@ You can also use the execute_javascript tool to run JavaScript code.`);
 
   useEffect(() => {
     window.canvas_api = {
-      stage: null,
-      layer: null
+      createIframe: (url, x, y, width, height) => {
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.position = 'absolute';
+        iframe.style.left = `${x}px`;
+        iframe.style.top = `${y}px`;
+        iframe.style.width = `${width}px`;
+        iframe.style.height = `${height}px`;
+        document.getElementById('canvas').appendChild(iframe);
+      },
+      stage: null // This will be set by the Canvas component
     };
   }, []);
 
@@ -91,17 +98,10 @@ You can also use the execute_javascript tool to run JavaScript code.`);
     }
   };
 
-  const handleAddRandomShape = () => {
-    const shape = new Rect({
-      x: Math.random() * (window.innerWidth / 2 - 50),
-      y: Math.random() * (window.innerHeight - 50),
-      width: 50,
-      height: 50,
-      fill: Konva.Util.getRandomColor(),
-      draggable: true
-    });
-    window.canvas_api.layer.add(shape);
-    window.canvas_api.layer.batchDraw();
+  const handleCreateBunnyIframe = () => {
+    const x = Math.floor(Math.random() * (window.innerWidth / 2 - 300));
+    const y = Math.floor(Math.random() * (window.innerHeight - 300));
+    window.canvas_api.createIframe('https://bunnies.io/', x, y, 300, 300);
   };
 
   return (
@@ -120,7 +120,7 @@ You can also use the execute_javascript tool to run JavaScript code.`);
           placeholder="Enter Claude API Key"
           className="mb-4"
         />
-        <Button onClick={handleAddRandomShape} className="mb-4">Add Random Shape</Button>
+        <Button onClick={handleCreateBunnyIframe} className="mb-4">Create Bunny Iframe</Button>
         <Chat messages={messages} onSendMessage={handleSendMessage} />
       </div>
       <div className="w-1/2 p-4">
