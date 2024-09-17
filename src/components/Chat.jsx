@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
-import ToolUseBox from './ToolUseBox';
+import ToolCallBox from './ToolCallBox';
 
 const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
   const messagesEndRef = useRef(null);
@@ -34,8 +34,8 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
       <div key={index} className={`mb-2 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
         <span className={`inline-block p-2 rounded ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
           {message.content}
-          {message.toolUses && message.toolUses.map((toolUse, toolIndex) => (
-            <ToolUseBox key={toolIndex} toolUse={toolUse} />
+          {message.toolCalls && message.toolCalls.map((toolCall, toolIndex) => (
+            <ToolCallBox key={toolIndex} toolCall={toolCall} />
           ))}
         </span>
       </div>
