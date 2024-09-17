@@ -2,31 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Chat from '../components/Chat';
 import Canvas from '../components/Canvas';
+import ConsoleLog from '../components/ConsoleLog';
 import { Textarea } from '../components/ui/textarea';
 import { Input } from '../components/ui/input';
+import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from '../components/ui/resizable';
 
 const Index = () => {
   const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the canvas_api to manipulate the canvas. Available methods:
-  - canvas_api.createIframe(url, x, y, width, height): Creates an iframe on the canvas
   - canvas_api.stage: Access to the Konva stage object for more advanced manipulations
 
-You can also use the execute_javascript tool to run JavaScript code.`);
+You can also use the execute_javascript tool to run JavaScript code. The output will be displayed in the console log on the right side of the screen.`);
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
   const [messages, setMessages] = useState([]);
+  const [consoleOutput, setConsoleOutput] = useState([]);
 
   useEffect(() => {
-    window.canvas_api = {
-      createIframe: (url, x, y, width, height) => {
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.style.position = 'absolute';
-        iframe.style.left = `${x}px`;
-        iframe.style.top = `${y}px`;
-        iframe.style.width = `${width}px`;
-        iframe.style.height = `${height}px`;
-        document.getElementById('canvas').appendChild(iframe);
-      },
-      stage: null // This will be set by the Canvas component
+    const originalConsoleLog = console.log;
+    console.log = (...args) => {
+      setConsoleOutput(prev => [...prev, args.join(' ')]);
+      originalConsoleLog(...args);
+    };
+
+    return () => {
+      console.log = originalConsoleLog;
     };
   }, []);
 
@@ -94,27 +92,38 @@ You can also use the execute_javascript tool to run JavaScript code.`);
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/2 p-4 flex flex-col">
-        <Textarea
-          value={systemPrompt}
-          onChange={(e) => setSystemPrompt(e.target.value)}
-          placeholder="Enter system prompt"
-          className="mb-4"
-        />
-        <Input
-          type="password"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          placeholder="Enter Claude API Key"
-          className="mb-4"
-        />
-        <Chat messages={messages} onSendMessage={handleSendMessage} />
-      </div>
-      <div className="w-1/2 p-4">
-        <Canvas />
-      </div>
-    </div>
+    <ResizablePanelGroup direction="horizontal" className="h-screen">
+      <ResizablePanel defaultSize={50} minSize={30}>
+        <div className="p-4 flex flex-col h-full">
+          <Textarea
+            value={systemPrompt}
+            onChange={(e) => setSystemPrompt(e.target.value)}
+            placeholder="Enter system prompt"
+            className="mb-4"
+          />
+          <Input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Enter Claude API Key"
+            className="mb-4"
+          />
+          <Chat messages={messages} onSendMessage={handleSendMessage} />
+        </div>
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={50} minSize={30}>
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel defaultSize={70}>
+            <Canvas />
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel defaultSize={30}>
+            <ConsoleLog output={consoleOutput} />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 };
 
