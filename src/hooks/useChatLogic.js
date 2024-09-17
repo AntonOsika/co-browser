@@ -25,8 +25,8 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
           tools: [
             {
               type: 'function',
+              name: 'execute_javascript',
               function: {
-                name: 'execute_javascript',
                 description: 'Execute JavaScript code',
                 parameters: {
                   type: 'object',
@@ -42,8 +42,8 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
             },
             {
               type: 'function',
+              name: 'execute_bash',
               function: {
-                name: 'execute_bash',
                 description: 'Execute bash commands',
                 parameters: {
                   type: 'object',
