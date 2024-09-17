@@ -3,31 +3,9 @@ import { useState } from 'react';
 export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
   const [messages, setMessages] = useState([]);
 
-  const ensureAlternatingRoles = (msgs) => {
-    const result = [];
-    let lastRole = 'assistant';
-
-    for (const msg of msgs) {
-      if (msg.role !== lastRole) {
-        result.push(msg);
-        lastRole = msg.role;
-      } else {
-        result.push({ role: lastRole === 'user' ? 'assistant' : 'user', content: '' });
-        result.push(msg);
-        lastRole = msg.role;
-      }
-    }
-
-    if (lastRole === 'user') {
-      result.push({ role: 'assistant', content: '' });
-    }
-
-    return result;
-  };
-
   const handleSendMessage = async (message) => {
     const newMessage = { role: 'user', content: message };
-    const updatedMessages = ensureAlternatingRoles([...messages, newMessage]);
+    const updatedMessages = [...messages, newMessage];
     setMessages(updatedMessages);
 
     try {
@@ -80,12 +58,13 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
       const data = await response.json();
       
       if (data.content && data.content.length > 0) {
-        let assistantMessage = { role: 'assistant', content: '' };
+        let assistantMessage = { role: 'assistant', content: '', toolUses: [] };
         
         for (const item of data.content) {
           if (item.type === 'text') {
             assistantMessage.content += item.text;
           } else if (item.type === 'tool_use') {
+            assistantMessage.toolUses.push(item);
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
             } else if (item.name === 'execute_bash') {
@@ -94,7 +73,7 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
           }
         }
         
-        setMessages(prevMessages => ensureAlternatingRoles([...prevMessages, assistantMessage]));
+        setMessages(prevMessages => [...prevMessages, assistantMessage]);
       } else {
         console.error('Unexpected API response format:', data);
       }
