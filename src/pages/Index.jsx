@@ -31,18 +31,29 @@ Use this function to report observations from JavaScript code execution to the A
 
   useEffect(() => {
     const originalConsoleLog = console.log;
+    const originalConsoleError = console.error;
     console.log = (...args) => {
       appendToConsole(args.join(' '));
       originalConsoleLog(...args);
+    };
+    console.error = (...args) => {
+      appendToConsole('ERROR: ' + args.join(' '));
+      originalConsoleError(...args);
     };
 
     window.js_observation = (message) => {
       setChatInput(prev => `javascript observation:\n${message}\n\n${prev}`);
     };
 
+    window.onerror = (message, source, lineno, colno, error) => {
+      console.error(`Global error: ${message} at ${source}:${lineno}:${colno}`, error);
+    };
+
     return () => {
       console.log = originalConsoleLog;
+      console.error = originalConsoleError;
       delete window.js_observation;
+      window.onerror = null;
     };
   }, [appendToConsole]);
 

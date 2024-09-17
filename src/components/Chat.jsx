@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import ToolUseBox from './ToolUseBox';
 
@@ -19,6 +19,13 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
     if (chatInput.trim()) {
       onSendMessage(chatInput);
       setChatInput('');
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
@@ -43,12 +50,13 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="flex">
-        <Input
-          type="text"
+        <Textarea
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="flex-grow mr-2"
+          className="flex-grow mr-2 resize-none"
+          rows={3}
         />
         <Button type="submit">Send</Button>
       </form>
