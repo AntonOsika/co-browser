@@ -3,7 +3,7 @@ import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import ToolUseBox from './ToolUseBox';
 
-const Chat = ({ messages, onSendMessage, chatInput, setChatInput, bashOutput }) => {
+const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -12,7 +12,7 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput, bashOutput }) 
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, bashOutput]);
+  }, [messages]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,13 +46,6 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput, bashOutput }) 
     <div className="flex flex-col h-full">
       <div className="flex-grow overflow-y-auto mb-4 pr-2">
         {messages.map((message, index) => renderMessage(message, index))}
-        {bashOutput && (
-          <div className="mb-2 text-left">
-            <span className="inline-block p-2 rounded bg-gray-200 font-mono text-sm">
-              {bashOutput}
-            </span>
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="flex">

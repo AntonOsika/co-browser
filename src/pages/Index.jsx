@@ -32,7 +32,6 @@ window.llm("What is the capital of France?").then(response => {
   const [apiKey, setApiKey] = useLocalStorage('apiKey', '');
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [chatInput, setChatInput] = useState('');
-  const [bashOutput, setBashOutput] = useState('');
   const terminalRef = useRef(null);
 
   const appendToConsole = useCallback((message) => {
@@ -40,7 +39,7 @@ window.llm("What is the capital of France?").then(response => {
   }, []);
 
   const handleBashOutput = useCallback((output) => {
-    setBashOutput(prev => prev + output + '\n');
+    setChatInput(prev => prev + output);
   }, []);
 
   const handleBashCommand = useCallback((command) => {
@@ -133,7 +132,6 @@ window.llm("What is the capital of France?").then(response => {
               onSendMessage={handleSendMessage}
               chatInput={chatInput}
               setChatInput={setChatInput}
-              bashOutput={bashOutput}
             />
           </div>
         </div>

@@ -79,7 +79,6 @@ const Terminal = forwardRef(({ onBashCommand, onBashOutput }, ref) => {
     }
   };
 
-  // Expose the executeBashCommand function
   useImperativeHandle(ref, () => ({
     executeBashCommand
   }));
