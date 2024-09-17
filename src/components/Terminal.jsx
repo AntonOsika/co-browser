@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Input } from './ui/input';
 
-const Terminal = ({ onBashCommand, onBashOutput }) => {
+const Terminal = forwardRef(({ onBashCommand, onBashOutput }, ref) => {
   const [output, setOutput] = useState([]);
   const [input, setInput] = useState('');
   const [isReady, setIsReady] = useState(false);
@@ -80,7 +80,7 @@ const Terminal = ({ onBashCommand, onBashOutput }) => {
   };
 
   // Expose the executeBashCommand function
-  React.useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     executeBashCommand
   }));
 
@@ -102,6 +102,8 @@ const Terminal = ({ onBashCommand, onBashOutput }) => {
       />
     </div>
   );
-};
+});
 
-export default React.forwardRef(Terminal);
+Terminal.displayName = 'Terminal';
+
+export default Terminal;
