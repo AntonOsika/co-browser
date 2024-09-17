@@ -4,6 +4,7 @@ import Chat from '../components/Chat';
 import Canvas from '../components/Canvas';
 import { Textarea } from '../components/ui/textarea';
 import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 
 const Index = () => {
   const [systemPrompt, setSystemPrompt] = useLocalStorage('systemPrompt', `You can use the canvas_api to manipulate the canvas. Available methods:
@@ -47,7 +48,7 @@ You can also use the execute_javascript tool to run JavaScript code.`);
           model: 'claude-3-sonnet-20240229',
           max_tokens: 1024,
           system: systemPrompt,
-          messages: messages.filter(msg => msg.role !== 'tool_use').concat(newMessage),
+          messages: messages.filter(msg => msg.role === 'user' || msg.role === 'assistant').concat(newMessage),
           tools: [
             {
               name: 'execute_javascript',
@@ -70,9 +71,10 @@ You can also use the execute_javascript tool to run JavaScript code.`);
       const data = await response.json();
       
       if (data.content && data.content.length > 0) {
+        let assistantMessage = { role: 'assistant', content: '' };
         for (const item of data.content) {
           if (item.type === 'text') {
-            setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: item.text }]);
+            assistantMessage.content += item.text;
           } else if (item.type === 'tool_use') {
             setMessages(prevMessages => [...prevMessages, { role: 'tool_use', name: item.name, input: item.input }]);
             if (item.name === 'execute_javascript') {
@@ -85,12 +87,21 @@ You can also use the execute_javascript tool to run JavaScript code.`);
             }
           }
         }
+        if (assistantMessage.content) {
+          setMessages(prevMessages => [...prevMessages, assistantMessage]);
+        }
       } else {
         console.error('Unexpected API response format:', data);
       }
     } catch (error) {
       console.error('Error sending message:', error);
     }
+  };
+
+  const handleCreateBunnyIframe = () => {
+    const x = Math.floor(Math.random() * (window.innerWidth / 2 - 300));
+    const y = Math.floor(Math.random() * (window.innerHeight - 300));
+    window.canvas_api.createIframe('https://bunnies.io/', x, y, 300, 300);
   };
 
   return (
@@ -109,6 +120,7 @@ You can also use the execute_javascript tool to run JavaScript code.`);
           placeholder="Enter Claude API Key"
           className="mb-4"
         />
+        <Button onClick={handleCreateBunnyIframe} className="mb-4">Create Bunny Iframe</Button>
         <Chat messages={messages} onSendMessage={handleSendMessage} />
       </div>
       <div className="w-1/2 p-4">
