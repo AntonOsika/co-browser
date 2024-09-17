@@ -37,35 +37,31 @@ const Index = () => {
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
+          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20240620',
+          model: 'claude-3-sonnet-20240229',
           max_tokens: 1024,
-          messages: [...messages, newMessage],
-          system: systemPrompt,
-          tools: [
-            {
-              name: 'execute_javascript',
-              description: 'Execute JavaScript code',
-              input_schema: {
-                type: 'object',
-                properties: {
-                  code: {
-                    type: 'string',
-                    description: 'The JavaScript code to execute'
-                  }
-                },
-                required: ['code']
-              }
-            }
-          ]
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...messages.map(msg => ({ role: msg.role, content: msg.content })),
+            newMessage
+          ],
+          system: systemPrompt
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
-      setMessages([...messages, newMessage, data.content[0]]);
+      if (data.content && data.content[0] && data.content[0].text) {
+        const aiMessage = { role: 'assistant', content: data.content[0].text };
+        setMessages(prevMessages => [...prevMessages, aiMessage]);
+      } else {
+        console.error('Unexpected API response format:', data);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     }
