@@ -26,35 +26,51 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
             {
               type: 'function',
               name: 'execute_javascript',
-              function: {
-                description: 'Execute JavaScript code',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    code: {
-                      type: 'string',
-                      description: 'The JavaScript code to execute'
-                    }
-                  },
-                  required: ['code']
-                }
+              description: 'Execute JavaScript code',
+              parameters: {
+                type: 'object',
+                properties: {
+                  code: {
+                    type: 'string',
+                    description: 'The JavaScript code to execute'
+                  }
+                },
+                required: ['code']
+              },
+              input_schema: {
+                type: 'object',
+                properties: {
+                  code: {
+                    type: 'string',
+                    description: 'The JavaScript code to execute'
+                  }
+                },
+                required: ['code']
               }
             },
             {
               type: 'function',
               name: 'execute_bash',
-              function: {
-                description: 'Execute bash commands',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    command: {
-                      type: 'string',
-                      description: 'The bash command to execute'
-                    }
-                  },
-                  required: ['command']
-                }
+              description: 'Execute bash commands',
+              parameters: {
+                type: 'object',
+                properties: {
+                  command: {
+                    type: 'string',
+                    description: 'The bash command to execute'
+                  }
+                },
+                required: ['command']
+              },
+              input_schema: {
+                type: 'object',
+                properties: {
+                  command: {
+                    type: 'string',
+                    description: 'The bash command to execute'
+                  }
+                },
+                required: ['command']
               }
             }
           ]
