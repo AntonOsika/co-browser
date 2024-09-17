@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Chat from '../components/Chat';
 import Terminal from '../components/Terminal';
@@ -33,8 +33,7 @@ window.llm("What is the capital of France?").then(response => {
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [bashOutput, setBashOutput] = useState('');
-
-  const { messages, handleSendMessage, executeJavaScript, executeBash } = useChatLogic(apiKey, systemPrompt);
+  const terminalRef = useRef(null);
 
   const appendToConsole = useCallback((message) => {
     setConsoleOutput(prev => [...prev, message]);
@@ -43,6 +42,14 @@ window.llm("What is the capital of France?").then(response => {
   const handleBashOutput = useCallback((output) => {
     setBashOutput(prev => prev + output + '\n');
   }, []);
+
+  const handleBashCommand = useCallback((command) => {
+    if (terminalRef.current) {
+      terminalRef.current.executeBashCommand(command);
+    }
+  }, []);
+
+  const { messages, handleSendMessage, executeJavaScript } = useChatLogic(apiKey, systemPrompt, handleBashCommand);
 
   useEffect(() => {
     const originalConsoleLog = console.log;
@@ -135,7 +142,7 @@ window.llm("What is the capital of France?").then(response => {
       <ResizablePanel defaultSize={50} minSize={30}>
         <ResizablePanelGroup direction="vertical">
           <ResizablePanel defaultSize={50}>
-            <Terminal onBashCommand={executeBash} onBashOutput={handleBashOutput} />
+            <Terminal ref={terminalRef} onBashCommand={handleBashCommand} onBashOutput={handleBashOutput} />
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel defaultSize={50}>

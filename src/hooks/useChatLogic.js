@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export const useChatLogic = (apiKey, systemPrompt) => {
+export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
   const [messages, setMessages] = useState([]);
 
   const ensureAlternatingRoles = (msgs) => {
@@ -90,8 +90,7 @@ export const useChatLogic = (apiKey, systemPrompt) => {
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
             } else if (item.name === 'execute_bash') {
-              const output = executeBash(item.input.command);
-              assistantMessage.content += `\n\nBash command output:\n${output}`;
+              onBashCommand(item.input.command);
             }
           }
         }
@@ -114,11 +113,5 @@ export const useChatLogic = (apiKey, systemPrompt) => {
     }
   };
 
-  const executeBash = (command) => {
-    // Simulate bash command execution
-    console.log(`Simulating bash command: ${command}`);
-    return `Simulated output for: ${command}\n(Note: Actual bash execution is not possible in the browser environment)`;
-  };
-
-  return { messages, handleSendMessage, executeJavaScript, executeBash };
+  return { messages, handleSendMessage, executeJavaScript };
 };

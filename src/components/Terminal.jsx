@@ -24,11 +24,11 @@ const Terminal = ({ onBashCommand, onBashOutput }) => {
         case 'output':
         case 'error':
           appendToOutput(message.data);
-          onBashOutput(message.data); // Send bash output to chat
+          onBashOutput(message.data);
           break;
         case 'terminated':
           appendToOutput(`Shell terminated with code ${message.code}`);
-          onBashOutput(`Shell terminated with code ${message.code}`); // Send termination message to chat
+          onBashOutput(`Shell terminated with code ${message.code}`);
           break;
       }
     });
@@ -70,6 +70,20 @@ const Terminal = ({ onBashCommand, onBashOutput }) => {
     }
   };
 
+  const executeBashCommand = (command) => {
+    if (isReady) {
+      appendToOutput(`$ ${command}`);
+      socketRef.current.send(JSON.stringify({ type: 'command', command: command }));
+    } else {
+      console.error('WebSocket connection is not ready');
+    }
+  };
+
+  // Expose the executeBashCommand function
+  React.useImperativeHandle(ref, () => ({
+    executeBashCommand
+  }));
+
   return (
     <div className="flex flex-col h-full bg-black text-white font-mono text-sm p-4">
       <div ref={outputRef} className="flex-grow overflow-y-auto mb-4">
@@ -90,4 +104,4 @@ const Terminal = ({ onBashCommand, onBashOutput }) => {
   );
 };
 
-export default Terminal;
+export default React.forwardRef(Terminal);
