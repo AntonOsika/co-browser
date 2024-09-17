@@ -41,7 +41,7 @@ const Index = () => {
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-3-sonnet-20240229',
+          model: 'claude-3-5-sonnet-20240620',
           max_tokens: 1024,
           messages: [...messages, newMessage],
           system: systemPrompt,
@@ -65,13 +65,7 @@ const Index = () => {
       });
 
       const data = await response.json();
-      
-      if (data.content && data.content.length > 0) {
-        const aiMessage = { role: 'assistant', content: data.content[0].text };
-        setMessages(prevMessages => [...prevMessages, aiMessage]);
-      } else {
-        console.error('Unexpected API response format:', data);
-      }
+      setMessages([...messages, newMessage, data.content[0]]);
     } catch (error) {
       console.error('Error sending message:', error);
     }
