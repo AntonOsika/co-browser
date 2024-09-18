@@ -73,7 +73,7 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="flex-grow mr-2 p-2 border rounded resize-none overflow-y-auto max-h-[80vh]"
+          className="flex-grow mr-2 p-2 border rounded resize-none overflow-y-auto min-h-[2.5em] max-h-[80vh] transition-all duration-200 focus:min-h-[5em]"
           rows={1}
         />
         <Button type="submit">Send</Button>

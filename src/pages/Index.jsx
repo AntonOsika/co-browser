@@ -5,6 +5,8 @@ import Terminal from '../components/Terminal';
 import ConsoleLog from '../components/ConsoleLog';
 import { Textarea } from '../components/ui/textarea';
 import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from '../components/ui/resizable';
 import { useChatLogic } from '../hooks/useChatLogic';
 
@@ -128,13 +130,6 @@ window.llm("What is the capital of France?").then(response => {
     };
   }, [appendToConsole, setChatInput, apiKey]);
 
-  useEffect(() => {
-    if (systemPromptRef.current) {
-      systemPromptRef.current.style.height = 'auto';
-      systemPromptRef.current.style.height = `${systemPromptRef.current.scrollHeight}px`;
-    }
-  }, [systemPrompt]);
-
   return (
     <ResizablePanelGroup direction="horizontal" className="h-screen">
       <ResizablePanel defaultSize={50} minSize={30}>
@@ -142,21 +137,26 @@ window.llm("What is the capital of France?").then(response => {
           <Textarea
             ref={systemPromptRef}
             value={systemPrompt}
-            onChange={(e) => {
-              setSystemPrompt(e.target.value);
-              e.target.style.height = 'auto';
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
+            onChange={(e) => setSystemPrompt(e.target.value)}
             placeholder="Enter system prompt"
-            className="mb-4 min-h-[100px] max-h-[80vh] overflow-y-auto resize-none"
+            className="mb-4 min-h-[4em] max-h-[80vh] overflow-y-auto resize-none transition-all duration-200 focus:min-h-[8em]"
           />
-          <Input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter Claude API Key"
-            className="mb-4"
-          />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="mb-4">Set API Key</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Set Claude API Key</DialogTitle>
+              </DialogHeader>
+              <Input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter Claude API Key"
+              />
+            </DialogContent>
+          </Dialog>
           <div className="flex-grow overflow-hidden">
             <Chat
               messages={messages}
