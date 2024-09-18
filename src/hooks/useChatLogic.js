@@ -77,6 +77,12 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
             }
           }
         }
+
+        // Ensure non-empty content for messages with only tool uses
+        if (assistantMessage.content === '' && assistantMessage.toolUses.length > 0) {
+          assistantMessage.content = ' '; // Add a space as minimal non-empty content
+          renderAssistantMessage.content = ' '; // Add a space as minimal non-empty content
+        }
         
         setMessages(prevMessages => [...prevMessages, assistantMessage]);
         setRenderMessages(prevRenderMessages => [...prevRenderMessages, renderAssistantMessage]);
