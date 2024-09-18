@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from 'react';
-import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import ToolCallBox from './ToolCallBox';
+import autosize from 'autosize';
 
 const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -14,11 +15,25 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      autosize(textareaRef.current);
+    }
+    return () => {
+      if (textareaRef.current) {
+        autosize.destroy(textareaRef.current);
+      }
+    };
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (chatInput.trim()) {
       onSendMessage(chatInput);
       setChatInput('');
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
     }
   };
 
@@ -49,13 +64,17 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="flex">
-        <Textarea
+        <textarea
+          ref={textareaRef}
           value={chatInput}
-          onChange={(e) => setChatInput(e.target.value)}
+          onChange={(e) => {
+            setChatInput(e.target.value);
+            autosize.update(textareaRef.current);
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="flex-grow mr-2 resize-none"
-          rows={3}
+          className="flex-grow mr-2 p-2 border rounded resize-none overflow-hidden"
+          rows={1}
         />
         <Button type="submit">Send</Button>
       </form>
