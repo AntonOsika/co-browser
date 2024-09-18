@@ -9,7 +9,26 @@
 - user can see all system prompt etc, super transparent what happens (because developer is the user)
 - console log all network errors
 - record everything that happens with rrweb. Let the AI "Ask" for what happened. Let the AI replay things the user did.
+- Create 
+- Add reasoning steps
+- Let the AI have access to more things and context on the situation
+
 
 IDEAS:
 - accept status. + throw away context. Accepts are persisted after refresh.
+- Goals and subgoals, where the user + human can edit them
 - test suite?
+
+
+TOOLS:
+- surgically edit file action
+- 
+
+later:
+- render html (artifacts) with callbacks to put things in context
+
+
+UNKNOWNS:
+- how to update default system prompt. Probably don't make that editable by
+user? Two step process to make it "Read only"?
+
