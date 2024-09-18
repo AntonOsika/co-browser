@@ -24,19 +24,8 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
           messages: updatedMessages.map(({ role, content }) => ({ role, content })),
           tools: [
             {
-              type: 'function',
               name: 'execute_javascript',
               description: 'Execute JavaScript code',
-              parameters: {
-                type: 'object',
-                properties: {
-                  code: {
-                    type: 'string',
-                    description: 'The JavaScript code to execute'
-                  }
-                },
-                required: ['code']
-              },
               input_schema: {
                 type: 'object',
                 properties: {
@@ -49,19 +38,8 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
               }
             },
             {
-              type: 'function',
               name: 'execute_bash',
               description: 'Execute bash commands',
-              parameters: {
-                type: 'object',
-                properties: {
-                  command: {
-                    type: 'string',
-                    description: 'The bash command to execute'
-                  }
-                },
-                required: ['command']
-              },
               input_schema: {
                 type: 'object',
                 properties: {
@@ -87,10 +65,10 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
             assistantMessage.content += item.text;
           } else if (item.type === 'tool_call') {
             assistantMessage.toolCalls.push(item);
-            if (item.function.name === 'execute_javascript') {
-              executeJavaScript(item.function.arguments.code);
-            } else if (item.function.name === 'execute_bash') {
-              onBashCommand(item.function.arguments.command);
+            if (item.name === 'execute_javascript') {
+              executeJavaScript(item.arguments.code);
+            } else if (item.name === 'execute_bash') {
+              onBashCommand(item.arguments.command);
             }
           }
         }
