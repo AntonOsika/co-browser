@@ -28,7 +28,10 @@ later:
 - render html (artifacts) with callbacks to put things in context
 
 
-UNKNOWNS:
+QUESTIONS:
 - how to update default system prompt. Probably don't make that editable by
 user? Two step process to make it "Read only"?
 
+
+FIXES:
+- not rendering JS errors correctly
