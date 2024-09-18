@@ -35,7 +35,6 @@ window.llm("What is the capital of France?").then(response => {
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const terminalRef = useRef(null);
-  const systemPromptRef = useRef(null);
 
   const deepStringify = (obj, depth = 0, maxDepth = 3) => {
     if (depth > maxDepth) return '[Object]';
@@ -135,7 +134,6 @@ window.llm("What is the capital of France?").then(response => {
       <ResizablePanel defaultSize={50} minSize={30}>
         <div className="p-4 flex flex-col h-full">
           <Textarea
-            ref={systemPromptRef}
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
             placeholder="Enter system prompt"
