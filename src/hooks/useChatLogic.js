@@ -2,11 +2,13 @@ import { useState } from 'react';
 
 export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
   const [messages, setMessages] = useState([]);
+  const [renderMessages, setRenderMessages] = useState([]);
 
   const handleSendMessage = async (message) => {
     const newMessage = { role: 'user', content: message };
     const updatedMessages = [...messages, newMessage];
     setMessages(updatedMessages);
+    setRenderMessages(prevRenderMessages => [...prevRenderMessages, newMessage]);
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -59,12 +61,15 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
       
       if (data.content && data.content.length > 0) {
         let assistantMessage = { role: 'assistant', content: '', toolUses: [] };
+        let renderAssistantMessage = { role: 'assistant', content: '', toolUses: [] };
         
         for (const item of data.content) {
           if (item.type === 'text') {
             assistantMessage.content += item.text;
+            renderAssistantMessage.content += item.text;
           } else if (item.type === 'tool_use') {
             assistantMessage.toolUses.push(item);
+            renderAssistantMessage.toolUses.push(item);
             if (item.name === 'execute_javascript') {
               executeJavaScript(item.input.code);
             } else if (item.name === 'execute_bash') {
@@ -74,6 +79,7 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
         }
         
         setMessages(prevMessages => [...prevMessages, assistantMessage]);
+        setRenderMessages(prevRenderMessages => [...prevRenderMessages, renderAssistantMessage]);
       } else {
         console.error('Unexpected API response format:', data);
       }
@@ -91,5 +97,5 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
     }
   };
 
-  return { messages, handleSendMessage, executeJavaScript };
+  return { messages, renderMessages, handleSendMessage, executeJavaScript };
 };
