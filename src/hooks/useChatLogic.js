@@ -58,17 +58,17 @@ export const useChatLogic = (apiKey, systemPrompt, onBashCommand) => {
       const data = await response.json();
       
       if (data.content && data.content.length > 0) {
-        let assistantMessage = { role: 'assistant', content: '', toolCalls: [] };
+        let assistantMessage = { role: 'assistant', content: '', toolUses: [] };
         
         for (const item of data.content) {
           if (item.type === 'text') {
             assistantMessage.content += item.text;
-          } else if (item.type === 'tool_call') {
-            assistantMessage.toolCalls.push(item);
+          } else if (item.type === 'tool_use') {
+            assistantMessage.toolUses.push(item);
             if (item.name === 'execute_javascript') {
-              executeJavaScript(item.arguments.code);
+              executeJavaScript(item.input.code);
             } else if (item.name === 'execute_bash') {
-              onBashCommand(item.arguments.command);
+              onBashCommand(item.input.command);
             }
           }
         }
