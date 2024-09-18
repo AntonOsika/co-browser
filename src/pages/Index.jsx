@@ -143,7 +143,7 @@ window.llm("What is the capital of France?").then(response => {
           />
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" className="mb-4">Set API Key</Button>
+              <Button variant="outline" className="mb-4 w-32">Set API Key</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
