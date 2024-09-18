@@ -12,11 +12,15 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <div className="h-screen">
-          <Routes>
-            {navItems.map(({ to, page }) => (
-              <Route key={to} path={to} element={page} />
-            ))}
-          </Routes>
+          {chrome && chrome.runtime ? (
+            navItems.find(item => item.title === "Home")?.page
+           ) : (
+            <Routes>
+              {navItems.map(({ to, page }) => (
+                <Route key={to} path={to} element={page} />
+              ))}
+            </Routes>
+          )}
         </div>
       </BrowserRouter>
     </TooltipProvider>
