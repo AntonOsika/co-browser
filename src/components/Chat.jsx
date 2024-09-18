@@ -1,9 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Button } from './ui/button';
-import ToolCallBox from './ToolCallBox';
 import autosize from 'autosize';
 
-const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
+const Chat = ({ renderMessages, onSendMessage, chatInput, setChatInput }) => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -13,7 +12,7 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [renderMessages]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -44,13 +43,36 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
     }
   };
 
+  const ToolUseBox = ({ toolUse }) => {
+    const [isCollapsed, setIsCollapsed] = useState(true);
+    const toggleCollapse = () => setIsCollapsed(!isCollapsed);
+
+    const inputContent = JSON.stringify(toolUse.input, null, 2);
+    const lines = inputContent.split('\n');
+    const displayContent = isCollapsed ? lines.slice(0, 3).join('\n') : inputContent;
+
+    return (
+      <div className="bg-gray-100 border border-gray-300 rounded-md p-2 mt-2">
+        <h4 className="font-semibold text-sm text-gray-700 mb-1">Tool Use: {toolUse.name}</h4>
+        <pre className="text-xs bg-white p-2 rounded overflow-x-auto whitespace-pre-wrap">
+          <code>{displayContent}</code>
+        </pre>
+        {lines.length > 3 && (
+          <Button onClick={toggleCollapse} variant="link" size="sm" className="mt-1">
+            {isCollapsed ? 'Show more' : 'Show less'}
+          </Button>
+        )}
+      </div>
+    );
+  };
+
   const renderMessage = (message, index) => {
     return (
       <div key={index} className={`mb-2 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
         <span className={`inline-block p-2 rounded ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
           {message.content}
-          {message.toolCalls && message.toolCalls.map((toolCall, toolIndex) => (
-            <ToolCallBox key={toolIndex} toolCall={toolCall} />
+          {message.toolUses && message.toolUses.map((toolUse, toolIndex) => (
+            <ToolUseBox key={toolIndex} toolUse={toolUse} />
           ))}
         </span>
       </div>
@@ -60,7 +82,7 @@ const Chat = ({ messages, onSendMessage, chatInput, setChatInput }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow overflow-y-auto mb-4 pr-2">
-        {messages.map((message, index) => renderMessage(message, index))}
+        {renderMessages.map((message, index) => renderMessage(message, index))}
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="flex">

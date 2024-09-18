@@ -62,7 +62,7 @@ window.llm("What is the capital of France?").then(response => {
     }
   }, []);
 
-  const { messages, handleSendMessage, executeJavaScript } = useChatLogic(apiKey, systemPrompt, handleBashCommand);
+  const { messages, renderMessages, handleSendMessage, executeJavaScript } = useChatLogic(apiKey, systemPrompt, handleBashCommand);
 
   useEffect(() => {
     const originalConsoleLog = console.log;
@@ -157,7 +157,7 @@ window.llm("What is the capital of France?").then(response => {
           </Dialog>
           <div className="flex-grow overflow-hidden">
             <Chat
-              messages={messages}
+              renderMessages={renderMessages}
               onSendMessage={handleSendMessage}
               chatInput={chatInput}
               setChatInput={setChatInput}
