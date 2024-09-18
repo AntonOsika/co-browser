@@ -33,6 +33,7 @@ window.llm("What is the capital of France?").then(response => {
   const [consoleOutput, setConsoleOutput] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const terminalRef = useRef(null);
+  const systemPromptRef = useRef(null);
 
   const deepStringify = (obj, depth = 0, maxDepth = 3) => {
     if (depth > maxDepth) return '[Object]';
@@ -127,15 +128,27 @@ window.llm("What is the capital of France?").then(response => {
     };
   }, [appendToConsole, setChatInput, apiKey]);
 
+  useEffect(() => {
+    if (systemPromptRef.current) {
+      systemPromptRef.current.style.height = 'auto';
+      systemPromptRef.current.style.height = `${systemPromptRef.current.scrollHeight}px`;
+    }
+  }, [systemPrompt]);
+
   return (
     <ResizablePanelGroup direction="horizontal" className="h-screen">
       <ResizablePanel defaultSize={50} minSize={30}>
         <div className="p-4 flex flex-col h-full">
           <Textarea
+            ref={systemPromptRef}
             value={systemPrompt}
-            onChange={(e) => setSystemPrompt(e.target.value)}
+            onChange={(e) => {
+              setSystemPrompt(e.target.value);
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
             placeholder="Enter system prompt"
-            className="mb-4"
+            className="mb-4 min-h-[100px] max-h-[80vh] overflow-y-auto resize-none"
           />
           <Input
             type="password"
